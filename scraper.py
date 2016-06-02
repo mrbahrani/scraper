@@ -4,7 +4,7 @@ import staff
 import requests
 from bs4 import BeautifulSoup
 import json
-import Queue
+from Queue import Queue
 
 
 class SThread(Thread):
@@ -12,36 +12,31 @@ class SThread(Thread):
         Thread.__init__(self)
     def run(self):
         pass
-emptyPage = """
-<html><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><div class="row msht-app-list">
 
+emptyPage = u'\n\n<div class="row msht-app-list">\n    \n    \n</div>\n'
 
-</div>
-</body></html>
-"""
-#emptyPage is Not correct
 class Scraper:
 
     def __init__(self):
         self.output = []
+        self.qAppLinks = Queue()
         pass
 
     def start(self, keyWord):
         page = 0
         address = 'http://cafebazaar.ir/search/?q=%s&l=fa&partial=true&p=%d' % (keyWord, page)
         html = self.getHTML(address)
+
+        num_threads = 10
         if not html == emptyPage:
-            linkList = self.getAppLinks(html)
-            for link in linkList:
-                try:
-                    html = self.getHTML(link)
-                    out = self.getAppData(html)
-                    self.output.append(out)
-                except Exception as e:
-                    raise
-                else:
-                    pass
+            for i in range(num_threads):
+                worker = Thread(target=self.getFromQ)
+                worker.setDaemon(True)
+                worker.start()
+            self.getAppLinks(html)
+            self.qAppLinks.join()
+        else:
+            print "reached end of search"
 
 
     def getHTML(self,address):
@@ -90,6 +85,17 @@ class Scraper:
 
         dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
         return dic
+    def getFromQ(self):
+        link = self.qAppLinks.get()
+        self.qAppLinks.task_done()
+        try:
+            html = self.getHTML(link)
+            data = self.getAppData(html)
+        except Exception as e:
+            raise
+        else:
+            pass
+        self.output.append(data)
 
 s = Scraper()
 s.start('football')
