@@ -3,7 +3,6 @@ from threading import Thread
 import staff
 import requests
 from bs4 import BeautifulSoup
-import json
 from Queue import Queue
 
 
@@ -47,11 +46,10 @@ class Scraper:
     def getAppLinks(self, HTML):
         soup = BeautifulSoup(HTML, "html.parser")
         list = soup.findAll('div', {'class': 'msht-app'})
-        output = []
         for li in list:
             tmp = li.find('a').attrs['href']
-            output.append(staff.NormalizeURL(staff.removeWhiteSpace(tmp)))
-        return output
+            tmp2 = staff.NormalizeURL(staff.removeWhiteSpace(tmp))
+            self.qAppLinks.put(tmp2)
 
     def getAppData(self, HTML):
         soup = BeautifulSoup(HTML, "html.parser")
@@ -86,16 +84,12 @@ class Scraper:
         dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
         return dic
     def getFromQ(self):
-        link = self.qAppLinks.get()
-        self.qAppLinks.task_done()
-        try:
+        while True:
+            link = self.qAppLinks.get()
             html = self.getHTML(link)
             data = self.getAppData(html)
-        except Exception as e:
-            raise
-        else:
-            pass
-        self.output.append(data)
+            self.output.append(data)
+            self.qAppLinks.task_done()
 
 s = Scraper()
 s.start('football')
