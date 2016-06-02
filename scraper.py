@@ -13,11 +13,12 @@ class SThread(Thread):
     def run(self):
         pass
 emptyPage = """
-
-<div class="row msht-app-list">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"></head><body><div class="row msht-app-list">
 
 
 </div>
+</body></html>
 """
 #emptyPage is Not correct
 class Scraper:
@@ -91,5 +92,5 @@ class Scraper:
         return dic
 
 s = Scraper()
-s.start('sib')
+s.start('football')
 print s.output
