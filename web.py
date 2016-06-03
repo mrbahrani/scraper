@@ -15,9 +15,8 @@ def home():
 def result(data):
     dataList = data_parser(data)
     scr = Scraper()
-    scr.start("sib")
-    print scr.output
-    return render_template("search.html")
+    scr.start(data)
+    return render_template("search.html",results = scr.output)
 
 
 @app.route("/res" ,methods=["Post"])

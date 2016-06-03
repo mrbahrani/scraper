@@ -91,6 +91,6 @@ class Scraper:
             self.output.append(data)
             self.qAppLinks.task_done()
 
-# = Scraper()
+#s = Scraper()
 #s.start('football')
 #print s.output

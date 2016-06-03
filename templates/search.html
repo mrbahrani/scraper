@@ -9,21 +9,23 @@
 		<div id="title">
 			<b>Search Result</b>
 		</div>
+		{% for item in results %}
 		<div id="all-search-results">
 			<span class="search-result">
 				<span class="app-image">
-					<image src="../static/iamges/com.Sepita.Arash_The_Archer.png" style="width:100%; height:100%;"/>
+					<image src={{item['icon']}} style="width:100%; height:100%;"/>
 				</span>
 				<span class="app-name">
-					<b><a href="#" class="app-name-link">Arash The Archer</a></b>
+					<b><a href={{item['url']}} class="app-name-link">{{item['name']}}</a></b>
 				</span>
 				<span class="app-category">
-					Action
+					{{item['catagory']}}
 				</span>
 				<span class="app-price">
-					1000 Tomans
+					{{item['price']}}
 				</span>
 			</span>
 		</div>
+		{% endfor %}
 	</body>
 </html>
