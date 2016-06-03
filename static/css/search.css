@@ -1,0 +1,49 @@
+.need-font{
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+#title{
+	margin:5%;
+	height:auto;
+	width:auto;
+}
+#title b{
+	font-family:"Comic Sans MS", cursive, sans-serif;
+	font-size:25px;
+	margin:auto;
+}
+#all-search-results{
+	width:60%;
+	height:auto;
+	margin:auto;
+	background-color:#99ceff;
+	padding:2%;
+}
+.search-result{
+	position:absolute;
+	width:48%;
+	height:5%;
+	padding:2%;
+	background-color:#66b5ff;
+}
+.app-image{
+	position:absolute;
+	border-radius:5px;
+	width:30%;
+	height:96%;
+	margin-right:1%;
+}
+.app-name{
+	position:absolute;
+	height:30%;
+}
+.app-category{
+	position:absolute;
+	height:30%;
+	opacity:0.7;
+	margin:3% 0;
+}
+.app-price{
+	position:absolute;
+	height:30%;
+	
+}

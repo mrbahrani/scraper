@@ -91,6 +91,6 @@ class Scraper:
         dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
         return dic
 
-s = Scraper()
-s.start('football')
-print s.output
+# = Scraper()
+#s.start('football')
+#print s.output

@@ -1,0 +1,42 @@
+body{
+	padding:auto;
+	background-color:#cce6ff;
+}
+#container{
+	position:relative;
+	margin:10% auto;
+	background-color:#99ceff;
+	width:30%;
+	height:auto;
+	border-radius:5px;
+	padding:10px;
+}
+.need-font{
+	font-family:"Comic Sans MS", cursive, sans-serif;
+}
+#title{
+	position:relative;
+	margin:10% auto;
+	padding:0 30%;
+	font-size:30px;
+}
+#site-title{
+	margin:1%;
+	width:40%;
+	text-align:center;
+}
+#search-input-div{
+	padding-left:5%;
+	margin:10% auto;
+	
+}
+#search-input{
+	width:90%;
+}
+#search-button-div{
+	padding:0 35%;
+	margin:10% auto;
+}
+#search-button{
+	margin:10%;
+}
