@@ -14,18 +14,12 @@
 			<div id="search-input-div">
 				<form id="app-search" method="POST" action="http://127.0.0.1:5000/res">
 					<input type="text" name="seacrh-input" id="search-input" class="need-font" placeholder="Type here . . ."/>
-					<input type="submit" id="submit-search" style="display:none;"/>
+					<input type="submit" id="submit-search" />
 				</form>
 			</div>
-			<div id="search-button-div">
-				<button type="button" id="search-button" class="btn btn-default need-font" onclick="submitSearch()">Go Search!</button>
-			</div>
+
 		</div>
 	
-	<script>
-		function submitSearch(){
-			$("submit-search").click()
-		}
-	</script>
+
 	</body>
 </html>
