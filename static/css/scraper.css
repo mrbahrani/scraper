@@ -17,7 +17,7 @@ body{
 #title{
 	position:relative;
 	margin:10% auto;
-	padding:0 30%;
+	padding:0 26%;
 	font-size:30px;
 }
 #site-title{
@@ -39,4 +39,13 @@ body{
 }
 #search-button{
 	margin:10%;
+}
+#submit-search-div{
+	position:relative;
+	padding:2% 32%;
+}
+#submit-search{
+	position:absolute;
+	width:30%;
+	margin:auto;
 }
