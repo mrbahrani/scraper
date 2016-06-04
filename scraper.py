@@ -89,20 +89,17 @@ class Scraper:
         if appPrice == None:
             raise "cant Find Price of App"
         appPrice = appPrice.attrs['content']
-
-        appIcon = soup.find('img', {'class': 'app-img'})
-        if appIcon == None:
-            raise "cant Find Icon of App"
-        appIcon = appIcon.attrs['src']
-        appIcon = staff.NormalizeURL(appIcon)
+        appPrice = int(appPrice)
 
         appURL = soup.find('meta', {'itemprop': 'url'})
         if appURL == None:
             raise "cant Find URL of App"
         appURL = appURL.attrs['content']
         appURL = staff.NormalizeURL(appURL)
+        
+        appPakage = staff.getPakageName(appURL)
 
-        dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
+        dic = {'name': appName, 'price': appPrice, 'pakage': appPakage , 'category': appCategory}
         return dic
 
     def getFromQ(self, qIn, qOut):
@@ -120,11 +117,10 @@ class Scraper:
         conn = sqlite3.connect('database.db')
         while True:
             data = q.get()
-            query = "INSERT INTO APPS (NAME,PRICE,ICON,URL,CATEGORY) VALUES ("
+            query = "INSERT INTO APPS (NAME,PRICE,PAKAGE,CATEGORY) VALUES ("
             query = query + "'%s'," % (data['name'])
-            query = query + "'%s'," % (data['price'])
-            query = query + "'%s'," % (data['icon'])
-            query = query + "'%s'," % (data['url'])
+            query = query + "'%d'," % (data['price'])
+            query = query + "'%s'," % (data['pakage'])
             query = query + "'%s'"  % (data['category'])
             query = query + ")"
             conn.execute(query)
@@ -133,6 +129,5 @@ class Scraper:
         conn.close()
 
 if __name__ == '__main__':
-    s = Scraper('fa')
-    s.getCategory('weather')
+    Scraper().getCategory('weather')
 #print s.output
