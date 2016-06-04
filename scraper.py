@@ -8,19 +8,25 @@ from Queue import Queue
 emptyPage = u'\n\n<div class="row msht-app-list">\n    \n    \n</div>\n'
 
 class Scraper:
+    websiteAddress = "http://cafebazaar.ir/"
+    categoryLink = "cat/%s/"
+    listLink = "lists/%s/"
+    searchLink = "search/?q=%s"
+    page="p=%d"
+    enabledPartial = "partial=true"
+
+    bestSellingApps = "%s-best-selling-apps"
+    topRatedApps = "%s-top-rated"
+    newApps = "%s-new-apps"
+
+    newBestGames = "ml-best-new-%s-games"
+    topRatedGames = "all-time-great-%s-games"
+    topSellingGames = "%s-top-sellers"
+    topPaidSellingGames = "%s-top-sellers-iap"
+    newGames = "new-%s-games"
 
     def __init__(self, lang='en'):
-        self.websiteAddress = "http://cafebazaar.ir/"
-        self.categoryLink = "cat/%s/"
-        self.listLink = "lists/%s/"
-        self.bestSelling = "-best-selling-apps"
-        self.topRated = "-top-rated"
-        self.newApps = "weather-new-apps"
-        self.searchLink = "search/?q=%s"
         self.lang = "l=%s" % (lang)
-        self.enabledPartial = "partial=true"
-        self.icon = "1/upload/icons/%s.png"
-        self.page="p=%d"
         self.lock = Lock()
 
     def base(self, staticAddress, startPage, endPage):
@@ -38,7 +44,7 @@ class Scraper:
         t.start()
 
         while startPage <= endPage:
-            address = staticAddress + "&" + (self.page % startPage)
+            address = staticAddress + "&" + (Scraper.page % (startPage*24))
             html = self.getHTML(address)
             if not html == emptyPage:
                 self.getAppLinks(html, qAppLinks)
@@ -48,12 +54,16 @@ class Scraper:
         qAppLinks.join()
         output.join()
 
-    def getCategory(self, category, startPage=0, endPage=0):
-        staticAddress = self.websiteAddress + (self.listLink % (category+self.topRated)) + "?" + self.lang + "&" + self.enabledPartial
+    def getAppList(self, category, startPage=0, endPage=0):
+        staticAddress = Scraper.websiteAddress + (Scraper.listLink % (Scraper.topRatedApps % category)) + "?" + self.lang + "&" + Scraper.enabledPartial
+        self.base(staticAddress, startPage, endPage)
+
+    def getGameList(self, category, startPage=0, endPage=0):
+        staticAddress = Scraper.websiteAddress + (Scraper.listLink % (Scraper.topRatedGames % category)) + "?" + self.lang + "&" + Scraper.enabledPartial
         self.base(staticAddress, startPage, endPage)
 
     def search(self, keyWord, startPage=0, endPage=1):
-        staticAddress = self.websiteAddress + (self.searchLink % (keyWord)) + "&" + self.lang + "&" + self.enabledPartial
+        staticAddress = Scraper.websiteAddress + (Scraper.searchLink % (keyWord)) + "&" + self.lang + "&" + Scraper.enabledPartial
         self.base(staticAddress, startPage, endPage)
 
 
@@ -117,17 +127,27 @@ class Scraper:
         conn = sqlite3.connect('database.db')
         while True:
             data = q.get()
-            query = "INSERT INTO APPS (NAME,PRICE,PAKAGE,CATEGORY) VALUES ("
-            query = query + "'%s'," % (data['name'])
-            query = query + "'%d'," % (data['price'])
-            query = query + "'%s'," % (data['pakage'])
-            query = query + "'%s'"  % (data['category'])
-            query = query + ")"
+            cursor = conn.execute("SELECT * from APPS WHERE PAKAGE='%s'" % data['pakage'])
+            query = ''
+            if len(cursor.fetchall()) == 0:
+                print "."
+                query += "INSERT INTO APPS (NAME,PRICE,PAKAGE,CATEGORY) VALUES ("
+                query += "'%s'," % (data['name'])
+                query += "'%d'," % (data['price'])
+                query += "'%s'," % (data['pakage'])
+                query += "'%s'"  % (data['category'])
+                query += ")"
+            else:
+                query += "UPDATE APPS set "
+                query += "NAME='%s'," % (data['name'])
+                query += "PRICE='%d'," % (data['price'])
+                query += "CATEGORY='%s' "  % (data['category'])
+                query += "WHERE PAKAGE='%s'" % data['pakage']
             conn.execute(query)
             conn.commit()
             q.task_done()
         conn.close()
 
 if __name__ == '__main__':
-    Scraper().getCategory('weather')
+    Scraper().getAppList('weather', endPage=2)
 #print s.output
