@@ -20,7 +20,7 @@ class Scraper:
         self.lang = "l=%s" % (lang)
         self.enabledPartial = "partial=true"
         self.icon = "1/upload/icons/%s.png"
-        self.page="p=%d"
+        self.page="&p=%d"
         self.lock = Lock()
 
     def base(self, staticAddress, startPage, endPage):
