@@ -47,3 +47,4 @@ class APPS(Enum):
     Travel = "travel-local"
     Weather = "weather"
     Widgets = "widgets"
+ 
