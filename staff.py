@@ -10,3 +10,6 @@ def NormalizeURL(URL):
     if URL[0:5] == '/app/':
         return 'https://cafebazaar.ir' + URL
     return URL
+def getPakageName(URL):
+    tmp = URL.split('/')
+    return tmp[4]
