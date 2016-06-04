@@ -20,7 +20,7 @@ class Scraper:
         self.lang = "l=%s" % (lang)
         self.enabledPartial = "partial=true"
         self.icon = "1/upload/icons/%s.png"
-        self.page="&p=%d"
+        self.page="p=%d"
         self.lock = Lock()
 
     def base(self, staticAddress, startPage, endPage):
@@ -38,7 +38,7 @@ class Scraper:
         t.start()
 
         while startPage <= endPage:
-            address = staticAddress + (self.page % startPage)
+            address = staticAddress + "&" + (self.page % startPage)
             html = self.getHTML(address)
             if not html == emptyPage:
                 self.getAppLinks(html, qAppLinks)
@@ -96,7 +96,7 @@ class Scraper:
             raise "cant Find URL of App"
         appURL = appURL.attrs['content']
         appURL = staff.NormalizeURL(appURL)
-        
+
         appPakage = staff.getPakageName(appURL)
 
         dic = {'name': appName, 'price': appPrice, 'pakage': appPakage , 'category': appCategory}
