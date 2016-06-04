@@ -1,4 +1,5 @@
 import sqlite3
+import staff
 
 def searchInDB(keyword):
     result = []
@@ -8,6 +9,6 @@ def searchInDB(keyword):
     query += "or PAKAGE LIKE" + "'%" + keyword + "%'"
     cursor = conn.execute(query)
     for row in cursor:
-        dic = {'name': row[1], 'price': row[2], 'pakage': row[3] , 'category': row[4]}
+        dic = {'name': row[1], 'price': row[2], 'icon': staff.getIcon(row[3]) , 'url': staff.getUrl(row[3]), 'category': row[4]}
         result.append(dic)
-    print result
+    return result

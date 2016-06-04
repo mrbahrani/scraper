@@ -13,3 +13,7 @@ def NormalizeURL(URL):
 def getPakageName(URL):
     tmp = URL.split('/')
     return tmp[4]
+def getUrl(Pakage):
+    return "https://cafebazaar.ir/app/%s/" % (Pakage)
+def getIcon(Pakage):
+    return "https://s.cafebazaar.ir/1/upload/icons/%s.png" % (Pakage)
