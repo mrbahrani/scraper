@@ -1,27 +1,22 @@
-from threading import Thread
-#import buffer
+from threading import Thread, Lock
+import sqlite3
 import staff
 import requests
 from bs4 import BeautifulSoup
 from Queue import Queue
-
-
-class SThread(Thread):
-    def __ini__(self):
-        Thread.__init__(self)
-    def run(self):
-        pass
 
 emptyPage = u'\n\n<div class="row msht-app-list">\n    \n    \n</div>\n'
 
 class Scraper:
 
     def __init__(self):
-        self.output = []
+        self.output = Queue()
         self.qAppLinks = Queue()
-        pass
+        self.lock = Lock()
 
-    def start(self, keyWord):
+
+
+    def search(self, keyWord):
         page = 0
         address = 'http://cafebazaar.ir/search/?q=%s&l=fa&partial=true&p=%d' % (keyWord, page)
         html = self.getHTML(address)
@@ -33,13 +28,19 @@ class Scraper:
                 worker.setDaemon(True)
                 worker.start()
             self.getAppLinks(html)
+            t = Thread(target=self.saveToDB)
+            t.setDaemon(True)
+            t.start()
             self.qAppLinks.join()
+            self.output.join()
         else:
             print "reached end of search"
 
 
     def getHTML(self,address):
+        self.lock.acquire()
         res = requests.get(address)
+        self.lock.release()
         res.raise_for_status()
         return res.text
 
@@ -84,13 +85,33 @@ class Scraper:
         dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
         return dic
     def getFromQ(self):
+        #conn = sqlite3.connect('database.db')
         while True:
             link = self.qAppLinks.get()
-            html = self.getHTML(link)
-            data = self.getAppData(html)
-            self.output.append(data)
+            try:
+                html = self.getHTML(link)
+                data = self.getAppData(html)
+                self.output.put(data)
+            except Exception as e:
+                raise
             self.qAppLinks.task_done()
+    def saveToDB(self):
+        conn = sqlite3.connect('database.db')
+        while True:
+            data = self.output.get()
+            query = "INSERT INTO APPS (NAME,PRICE,ICON,URL,CATEGORY) VALUES ("
+            query = query + "'%s'," % (data['name'])
+            query = query + "'%s'," % (data['price'])
+            query = query + "'%s'," % (data['icon'])
+            query = query + "'%s'," % (data['url'])
+            query = query + "'%s'"  % (data['category'])
+            query = query + ")"
+            conn.execute(query)
+            conn.commit()
+            self.output.task_done()
+        conn.close()
 
-#s = Scraper()
-#s.start('football')
+if __name__ == '__main__':
+    s = Scraper()
+    s.search('football')
 #print s.output
