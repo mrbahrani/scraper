@@ -9,32 +9,52 @@ emptyPage = u'\n\n<div class="row msht-app-list">\n    \n    \n</div>\n'
 
 class Scraper:
 
-    def __init__(self):
-        self.output = Queue()
-        self.qAppLinks = Queue()
+    def __init__(self, lang='en'):
+        self.websiteAddress = "http://cafebazaar.ir/"
+        self.categoryLink = "cat/%s/"
+        self.listLink = "lists/%s/"
+        self.bestSelling = "-best-selling-apps"
+        self.topRated = "-top-rated"
+        self.newApps = "weather-new-apps"
+        self.searchLink = "search/?q=%s"
+        self.lang = "l=%s" % (lang)
+        self.enabledPartial = "partial=true"
+        self.icon = "1/upload/icons/%s.png"
+        self.page="p=%d"
         self.lock = Lock()
 
-
-
-    def search(self, keyWord):
-        page = 0
-        address = 'http://cafebazaar.ir/search/?q=%s&l=fa&partial=true&p=%d' % (keyWord, page)
-        html = self.getHTML(address)
+    def base(self, staticAddress, startPage, endPage):
+        output = Queue()
+        qAppLinks = Queue()
 
         num_threads = 10
-        if not html == emptyPage:
-            for i in range(num_threads):
-                worker = Thread(target=self.getFromQ)
-                worker.setDaemon(True)
-                worker.start()
-            self.getAppLinks(html)
-            t = Thread(target=self.saveToDB)
-            t.setDaemon(True)
-            t.start()
-            self.qAppLinks.join()
-            self.output.join()
-        else:
-            print "reached end of search"
+        for i in range(num_threads):
+            worker = Thread(target=self.getFromQ, args=(qAppLinks, output,))
+            worker.setDaemon(True)
+            worker.start()
+
+        t = Thread(target=self.saveToDB, args=(output,))
+        t.setDaemon(True)
+        t.start()
+
+        while startPage <= endPage:
+            address = staticAddress + (self.page % startPage)
+            html = self.getHTML(address)
+            if not html == emptyPage:
+                self.getAppLinks(html, qAppLinks)
+                startPage = startPage + 1
+            else:
+                break
+        qAppLinks.join()
+        output.join()
+
+    def getCategory(self, category, startPage=0, endPage=0):
+        staticAddress = self.websiteAddress + (self.listLink % (category+self.topRated)) + "?" + self.lang + "&" + self.enabledPartial
+        self.base(staticAddress, startPage, endPage)
+
+    def search(self, keyWord, startPage=0, endPage=1):
+        staticAddress = self.websiteAddress + (self.searchLink % (keyWord)) + "&" + self.lang + "&" + self.enabledPartial
+        self.base(staticAddress, startPage, endPage)
 
 
     def getHTML(self,address):
@@ -44,13 +64,13 @@ class Scraper:
         res.raise_for_status()
         return res.text
 
-    def getAppLinks(self, HTML):
+    def getAppLinks(self, HTML, q):
         soup = BeautifulSoup(HTML, "html.parser")
         list = soup.findAll('div', {'class': 'msht-app'})
         for li in list:
             tmp = li.find('a').attrs['href']
             tmp2 = staff.NormalizeURL(staff.removeWhiteSpace(tmp))
-            self.qAppLinks.put(tmp2)
+            q.put(tmp2)
 
     def getAppData(self, HTML):
         soup = BeautifulSoup(HTML, "html.parser")
@@ -84,21 +104,22 @@ class Scraper:
 
         dic = {'name': appName, 'price': appPrice, 'icon': appIcon , 'url': appURL, 'category': appCategory}
         return dic
-    def getFromQ(self):
+
+    def getFromQ(self, qIn, qOut):
         #conn = sqlite3.connect('database.db')
         while True:
-            link = self.qAppLinks.get()
+            link = qIn.get()
             try:
                 html = self.getHTML(link)
                 data = self.getAppData(html)
-                self.output.put(data)
+                qOut.put(data)
             except Exception as e:
                 raise
-            self.qAppLinks.task_done()
-    def saveToDB(self):
+            qIn.task_done()
+    def saveToDB(self, q):
         conn = sqlite3.connect('database.db')
         while True:
-            data = self.output.get()
+            data = q.get()
             query = "INSERT INTO APPS (NAME,PRICE,ICON,URL,CATEGORY) VALUES ("
             query = query + "'%s'," % (data['name'])
             query = query + "'%s'," % (data['price'])
@@ -108,10 +129,10 @@ class Scraper:
             query = query + ")"
             conn.execute(query)
             conn.commit()
-            self.output.task_done()
+            q.task_done()
         conn.close()
 
 if __name__ == '__main__':
-    s = Scraper()
-    s.search('football')
+    s = Scraper('fa')
+    s.getCategory('weather')
 #print s.output
