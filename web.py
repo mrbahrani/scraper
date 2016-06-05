@@ -18,7 +18,7 @@ def result(data):
 
 @app.route("/res" ,methods=["Post"])
 def check():
-    text=request.form["seacrh-input"]
-    print text
+    text=request.form["seacrh-input"].replace(' ','%')
+    #print text
     return redirect("/result/%s" %text)
 app.run(debug=True)

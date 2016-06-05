@@ -11,13 +11,13 @@ class acThread(Thread):
         self.cat = catagory
 
     def run(self):
-        try:
-            print "y"
-            s = Scraper('en')
+        #try:
+        print "y"
+        s = Scraper('en')
             #s.getCategory(self.cat)
-            s.getAppList(self.cat, endPage=0)
-        except:
-            print "n"
+        s.getAppList(self.cat, endPage=0)
+        #except:
+        #    print "n"
 
 class gcThread(Thread):
     def __init__(self,catagory):

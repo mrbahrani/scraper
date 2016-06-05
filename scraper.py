@@ -68,10 +68,14 @@ class Scraper:
 
 
     def getHTML(self,address):
-        self.lock.acquire()
-        res = requests.get(address)
+        res = ''
+        try:
+            self.lock.acquire()
+            res = requests.get(address)
+            res.raise_for_status()
+        except Exception as e:
+            pass
         self.lock.release()
-        res.raise_for_status()
         return res.text
 
     def getAppLinks(self, HTML, q):
