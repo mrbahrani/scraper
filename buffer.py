@@ -12,3 +12,5 @@ def searchInDB(keyword):
         dic = {'name': row[1], 'price': row[2], 'icon': staff.getIcon(row[3]) , 'url': staff.getUrl(row[3]), 'category': row[4]}
         result.append(dic)
     return result
+
+print searchInDB("foot")

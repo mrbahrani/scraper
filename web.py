@@ -1,6 +1,6 @@
 from scraper import Scraper
 from flask import Flask,render_template,request,url_for,redirect
-
+from buffer import searchInDB
 def data_parser(data):
     pass
 
@@ -13,10 +13,7 @@ def home():
 
 @app.route("/result/<data>")
 def result(data):
-    dataList = data_parser(data)
-    scr = Scraper()
-    scr.start(data)
-    return render_template("search.html",results = scr.output)
+    return render_template("search.html",results = searchInDB(data))
 
 
 @app.route("/res" ,methods=["Post"])
