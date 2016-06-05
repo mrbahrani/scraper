@@ -121,7 +121,7 @@ class Scraper:
                 data = self.getAppData(html)
                 qOut.put(data)
             except Exception as e:
-                raise
+                pass
             qIn.task_done()
     def saveToDB(self, q):
         conn = sqlite3.connect('database.db')
@@ -130,7 +130,6 @@ class Scraper:
             cursor = conn.execute("SELECT * from APPS WHERE PAKAGE='%s'" % data['pakage'])
             query = ''
             if len(cursor.fetchall()) == 0:
-                print "."
                 query += "INSERT INTO APPS (NAME,PRICE,PAKAGE,CATEGORY) VALUES ("
                 query += "'%s'," % (data['name'])
                 query += "'%d'," % (data['price'])
@@ -143,11 +142,16 @@ class Scraper:
                 query += "PRICE='%d'," % (data['price'])
                 query += "CATEGORY='%s' "  % (data['category'])
                 query += "WHERE PAKAGE='%s'" % data['pakage']
-            conn.execute(query)
-            conn.commit()
+            try:
+                conn.execute(query)
+                conn.commit()
+                print "."
+            except Exception as e:
+                pass
             q.task_done()
         conn.close()
 
 if __name__ == '__main__':
-    Scraper().getAppList('weather', endPage=2)
+    import baazar
+    Scraper().getGameList(baazar.Games.Arcade.value, endPage=2)
 #print s.output
